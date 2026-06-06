@@ -1,12 +1,8 @@
 {
   "name": "kalman-filter-visual-lab",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Interactive lab visualizing the internal behavior of data-assimilation methods (EKF/PO/EnSRF/ETKF/LETKF) on the Lorenz96 model.",
   "private": true,
-  "directories": {
-    "doc": "docs"
-  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
