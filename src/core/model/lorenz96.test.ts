@@ -16,6 +16,19 @@ describe('lorenz96 rhs', () => {
     const d = rhs(x, F);
     for (const v of d) expect(v).toBeCloseTo(0, 12);
   });
+
+  it('writes into the provided out buffer and returns it', () => {
+    const x = Float64Array.from([1, 2, 3, 4]);
+    const out = new Float64Array(4);
+    const ret = rhs(x, 8, out);
+    expect(ret).toBe(out);
+    expect(Array.from(out)).toEqual([3, 5, 11, 1]);
+  });
+
+  it('throws if the out buffer aliases x (cyclic stencil would self-corrupt)', () => {
+    const x = Float64Array.from([1, 2, 3, 4]);
+    expect(() => rhs(x, 8, x)).toThrow();
+  });
 });
 
 describe('lorenz96 integrate', () => {
@@ -26,6 +39,8 @@ describe('lorenz96 integrate', () => {
     const xT = integrate(x0, 8, 0.05, 2000);
     for (const v of xT) {
       expect(Number.isFinite(v)).toBe(true);
+      // Lorenz96 with F=8 is bounded (empirical |x| rarely exceeds ~20);
+      // 100 is a generous envelope that still catches blow-ups.
       expect(Math.abs(v)).toBeLessThan(100);
     }
   });
@@ -34,5 +49,16 @@ describe('lorenz96 integrate', () => {
     const x = new Float64Array(5).fill(8);
     const next = rk4Step(x, 8, 0.05);
     for (const v of next) expect(v).toBeCloseTo(8, 10);
+  });
+
+  it('does not mutate the input array', () => {
+    const x0 = Float64Array.from([1, 2, 3, 4, 5, 6, 7, 8]);
+    const orig = Array.from(x0);
+    integrate(x0, 8, 0.05, 10);
+    expect(Array.from(x0)).toEqual(orig);
+  });
+
+  it('rk4Step throws for N < 4 (Lorenz96 is undefined below 4 cells)', () => {
+    expect(() => rk4Step(new Float64Array(3).fill(8), 8, 0.05)).toThrow();
   });
 });
