@@ -1,0 +1,11 @@
+/** Numerical-stability constants (see design spec §7.7). */
+export const CHOLESKY_JITTER_EPS0 = 1e-10;
+export const CHOLESKY_MAX_ATTEMPTS = 5;
+/**
+ * Absolute floor for the jitter scale. When a matrix has a non-positive mean
+ * diagonal (e.g. an all-zero covariance), relative jitter (ε·meanDiag) would be
+ * zero — and ε·Number.MIN_VALUE underflows to 0 in float64 — so the diagonal
+ * would never be bumped and Cholesky would keep failing. Flooring the scale at 1
+ * guarantees ε·scale ≥ ε for any input, so jitter is always effective.
+ */
+export const CHOLESKY_JITTER_ABS_FLOOR = 1;

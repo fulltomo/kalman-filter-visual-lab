@@ -1,3 +1,5 @@
+import { CHOLESKY_JITTER_EPS0, CHOLESKY_MAX_ATTEMPTS, CHOLESKY_JITTER_ABS_FLOOR } from './constants';
+
 /** Row-major dense matrix. */
 export interface Mat {
   rows: number;
@@ -116,4 +118,72 @@ export function matVec(a: Mat, v: Float64Array): Float64Array {
     out[i] = s;
   }
   return out;
+}
+
+/** Lower-triangular Cholesky factor L (A = L Lᵀ), or null if A is not positive definite. */
+export function choleskyFactor(a: Mat): Mat | null {
+  const n = a.rows;
+  if (a.cols !== n) throw new Error('cholesky: not square');
+  const L = mat(n, n);
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j <= i; j++) {
+      let sum = a.data[i * n + j];
+      for (let k = 0; k < j; k++) sum -= L.data[i * n + k] * L.data[j * n + k];
+      if (i === j) {
+        if (sum <= 0) return null;
+        L.data[i * n + j] = Math.sqrt(sum);
+      } else {
+        L.data[i * n + j] = sum / L.data[j * n + j];
+      }
+    }
+  }
+  return L;
+}
+
+function meanDiag(a: Mat): number {
+  let s = 0;
+  for (let i = 0; i < a.rows; i++) s += a.data[i * a.cols + i];
+  return s / a.rows;
+}
+
+/**
+ * Solve A X = B for symmetric positive-definite A via Cholesky.
+ * On failure, add relative jitter (ε·mean(diag)·I), escalating ε ×10 up to
+ * CHOLESKY_MAX_ATTEMPTS times. Throws only if still not factorable.
+ */
+export function choleskySolve(a: Mat, b: Mat): { x: Mat; jitterApplied: boolean } {
+  const n = a.rows;
+  let L = choleskyFactor(a);
+  let jitterApplied = false;
+  if (L === null) {
+    jitterApplied = true;
+    const tau = Math.max(meanDiag(a), CHOLESKY_JITTER_ABS_FLOOR);
+    let eps = CHOLESKY_JITTER_EPS0;
+    for (let attempt = 0; attempt < CHOLESKY_MAX_ATTEMPTS && L === null; attempt++) {
+      const aj = clone(a);
+      const bump = eps * tau;
+      for (let i = 0; i < n; i++) aj.data[i * n + i] += bump;
+      L = choleskyFactor(aj);
+      eps *= 10;
+    }
+    if (L === null) throw new Error('choleskySolve: not positive definite after jitter');
+  }
+
+  const x = mat(n, b.cols);
+  const y = new Float64Array(n);
+  for (let c = 0; c < b.cols; c++) {
+    // forward substitution: L y = b[:, c]
+    for (let i = 0; i < n; i++) {
+      let s = b.data[i * b.cols + c];
+      for (let k = 0; k < i; k++) s -= L.data[i * n + k] * y[k];
+      y[i] = s / L.data[i * n + i];
+    }
+    // back substitution: Lᵀ x = y
+    for (let i = n - 1; i >= 0; i--) {
+      let s = y[i];
+      for (let k = i + 1; k < n; k++) s -= L.data[k * n + i] * x.data[k * b.cols + c];
+      x.data[i * b.cols + c] = s / L.data[i * n + i];
+    }
+  }
+  return { x, jitterApplied };
 }
