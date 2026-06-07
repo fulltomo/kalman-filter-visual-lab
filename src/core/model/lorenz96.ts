@@ -39,7 +39,7 @@ export function integrate(x: Float64Array, F: number, dt: number, steps: number)
 }
 
 /**
- * Jacobian ∂f/∂x of the Lorenz96 rhs at state x (N×N). Independent of F.
+ * Jacobian ∂f/∂x of the Lorenz96 rhs at state x (N×N). Independent of F. Requires N >= 4.
  * Nonzero partials of f_i = (x_{i+1} - x_{i-2}) x_{i-1} - x_i + F:
  *   ∂f_i/∂x_{i-2} = -x_{i-1},  ∂f_i/∂x_{i-1} = x_{i+1} - x_{i-2},
  *   ∂f_i/∂x_i = -1,           ∂f_i/∂x_{i+1} = x_{i-1}.

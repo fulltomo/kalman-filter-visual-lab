@@ -32,4 +32,27 @@ describe('lorenz96 jacobian', () => {
     expect(J.rows).toBe(5);
     expect(J.cols).toBe(5);
   });
+
+  it('is independent of F (the +F term has zero derivative)', () => {
+    const N = 6;
+    const r = makeRng(99);
+    const x = new Float64Array(N);
+    for (let i = 0; i < N; i++) x[i] = r.gaussian() * 3;
+
+    const J = jacobian(x); // takes no F argument
+    const eps = 1e-6;
+    // Central FD of rhs at F = 0 must equal the (F-free) analytic Jacobian;
+    // matching at F=0 here and at F=8 in the test above confirms F-independence.
+    for (let j = 0; j < N; j++) {
+      const xp = x.slice();
+      const xm = x.slice();
+      xp[j] += eps;
+      xm[j] -= eps;
+      const fp = rhs(xp, 0);
+      const fm = rhs(xm, 0);
+      for (let i = 0; i < N; i++) {
+        expect(get(J, i, j)).toBeCloseTo((fp[i] - fm[i]) / (2 * eps), 5);
+      }
+    }
+  });
 });
