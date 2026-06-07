@@ -153,6 +153,7 @@ function meanDiag(a: Mat): number {
  */
 export function choleskySolve(a: Mat, b: Mat): { x: Mat; jitterApplied: boolean } {
   const n = a.rows;
+  if (b.rows !== n) throw new Error(`choleskySolve: a is ${n}x${n} but b has ${b.rows} rows`);
   let L = choleskyFactor(a);
   let jitterApplied = false;
   if (L === null) {
