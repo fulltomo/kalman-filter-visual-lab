@@ -14,3 +14,7 @@ export const CHOLESKY_JITTER_ABS_FLOOR = 1;
 export const STATE_ABS_LIMIT = 1e3; // |x_i| beyond this ⇒ normExceeded
 export const VAR_TRACE_LIMIT = 1e8; // trace(P)/N beyond this ⇒ varExceeded
 export const SPREAD_FLOOR = 1e-8; // ensemble-collapse warning floor (used Phase 2+)
+
+/** Twin-experiment setup constants. */
+export const SPINUP_STEPS = 1000; // RK4 steps to land truth on the attractor
+export const INITIAL_BG_STD = 1.0; // std of the initial background error (x̂₀ᵃ, P₀ᵃ=std²·I)
