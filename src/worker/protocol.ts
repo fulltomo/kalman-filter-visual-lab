@@ -8,15 +8,16 @@ export interface Envelope {
   epoch: number;
 }
 
-export type Command = Envelope &
-  (
-    | { type: 'init' }
-    | { type: 'configure'; config: Config }
-    | { type: 'run'; fromCycle: number; toCycle: number; emit: 'frames' | 'diagnosticsOnly' }
-    | { type: 'requestCycle'; cycle: number }
-    | { type: 'cancel'; targetEpoch: number }
-    | { type: 'dispose' }
-  );
+/** Command payloads without the transport envelope (so they compose cleanly). */
+export type CommandBody =
+  | { type: 'init' }
+  | { type: 'configure'; config: Config }
+  | { type: 'run'; fromCycle: number; toCycle: number; emit: 'frames' | 'diagnosticsOnly' }
+  | { type: 'requestCycle'; cycle: number }
+  | { type: 'cancel'; targetEpoch: number }
+  | { type: 'dispose' };
+
+export type Command = Envelope & CommandBody;
 
 export type WorkerEvent = Envelope &
   (

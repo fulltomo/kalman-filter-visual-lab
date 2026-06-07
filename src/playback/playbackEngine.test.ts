@@ -83,20 +83,24 @@ describe('PlaybackEngine', () => {
 
   it('play advances sub-steps on each timer tick and pauses at the end', async () => {
     const { load } = fakeLoader(2);
-    let cb: (() => void | Promise<void>) | null = null;
+    const ticks: Array<() => void | Promise<void>> = [];
     const timer = {
       start: (fn: () => void | Promise<void>) => {
-        cb = fn;
+        ticks.push(fn);
       },
       stop: () => {
-        cb = null;
+        ticks.length = 0;
       },
     };
     const pb = new PlaybackEngine({ load, totalCycles: 2, cacheSize: 4, timer });
     await pb.seek(1, 0);
     pb.play();
     // 4 frames total (2 cycles × 2 sub-steps); advance to the end.
-    for (let i = 0; i < 10 && cb; i++) await cb();
+    // `stop()` (called by pause at the end) clears `ticks`, ending the loop.
+    for (let i = 0; i < 10; i++) {
+      if (ticks.length === 0) break;
+      await ticks[ticks.length - 1]();
+    }
     expect(pb.state.cycle).toBe(2);
     expect(pb.state.subIndex).toBe(1);
     expect(pb.state.playing).toBe(false);

@@ -1,5 +1,11 @@
 import type { Config } from '../core/types';
-import { PROTOCOL_VERSION, makeId, type Command, type WorkerEvent } from './protocol';
+import {
+  PROTOCOL_VERSION,
+  makeId,
+  type Command,
+  type CommandBody,
+  type WorkerEvent,
+} from './protocol';
 
 /** Minimal transport: send a Command, receive WorkerEvents. */
 export interface Port {
@@ -47,7 +53,7 @@ export class DaWorkerClient {
 
   /** Send a command, resolving when an event with a matching id and matching type predicate arrives. */
   private send<T extends WorkerEvent>(
-    cmd: Omit<Command, 'protocol' | 'id' | 'epoch'>,
+    cmd: CommandBody,
     done: (e: WorkerEvent) => e is T,
   ): Promise<T> {
     const id = makeId();

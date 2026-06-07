@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { defaultConfig } from '../core/types';
-import { PROTOCOL_VERSION, type Command, type WorkerEvent } from './protocol';
+import { PROTOCOL_VERSION, type Command, type CommandBody, type WorkerEvent } from './protocol';
 import { createWorkerCore } from './workerCore';
 
 function harness() {
@@ -10,8 +10,8 @@ function harness() {
     () => Promise.resolve(),
   );
   let n = 0;
-  const cmd = (c: Omit<Command, 'protocol' | 'id' | 'epoch'> & { epoch?: number }): Command =>
-    ({ protocol: PROTOCOL_VERSION, id: `c${n++}`, epoch: c.epoch ?? 1, ...c }) as Command;
+  const cmd = (c: CommandBody & { epoch?: number }): Command =>
+    ({ protocol: PROTOCOL_VERSION, id: `c${n++}`, ...c, epoch: c.epoch ?? 1 }) as Command;
   return { events, core, cmd };
 }
 
