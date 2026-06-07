@@ -18,3 +18,7 @@ export const SPREAD_FLOOR = 1e-8; // ensemble-collapse warning floor (used Phase
 /** Twin-experiment setup constants. */
 export const SPINUP_STEPS = 1000; // RK4 steps to land truth on the attractor
 export const INITIAL_BG_STD = 1.0; // std of the initial background error (x̂₀ᵃ, P₀ᵃ=std²·I)
+
+/** Performance-estimate constants (design-spec §7.6). */
+export const FLOP_THROUGHPUT = 2e8; // conservative dense double flop/s in JS
+export const FRAME_MAT_COUNT = 4; // ~N×N frame matrices materialized per viewed cycle
