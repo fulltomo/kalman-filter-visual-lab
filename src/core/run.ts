@@ -1,6 +1,6 @@
 import { type Config, type Warning, type SubStepFrame, type CycleDiag, ConfigError } from './types';
 import { validateConfig } from './validate';
-import { buildExperiment, type Experiment } from './experiment';
+import { buildExperiment } from './experiment';
 import { estimateCost } from './perf';
 import { makeEkf } from './filters/ekf';
 import type { Filter, Emit } from './filters/types';
@@ -21,7 +21,6 @@ export interface ComputeResult {
 /** Pure, synchronous orchestrator. Cycles must be requested in order. */
 export class DaRun {
   private filter: Filter | null = null;
-  private experiment: Experiment | null = null;
   private current = 0; // last completed cycle
 
   configure(raw: Config): ConfigureResult {
@@ -36,7 +35,6 @@ export class DaRun {
     const cost = estimateCost(config);
     if (cost.tier !== 'green') warnings.push({ code: 'heavyConfig', message: cost.message });
 
-    this.experiment = experiment;
     this.filter = makeEkf(experiment, config);
     this.current = 0;
 
