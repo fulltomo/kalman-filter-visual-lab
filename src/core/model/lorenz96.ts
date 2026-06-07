@@ -33,7 +33,7 @@ export function rk4Step(x: Float64Array, F: number, dt: number): Float64Array {
 }
 
 export function integrate(x: Float64Array, F: number, dt: number, steps: number): Float64Array {
-  let cur = x.slice();
+  let cur: Float64Array = x.slice();
   for (let s = 0; s < steps; s++) cur = rk4Step(cur, F, dt);
   return cur;
 }

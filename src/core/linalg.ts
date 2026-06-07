@@ -130,7 +130,9 @@ export function choleskyFactor(a: Mat): Mat | null {
       let sum = a.data[i * n + j];
       for (let k = 0; k < j; k++) sum -= L.data[i * n + k] * L.data[j * n + k];
       if (i === j) {
-        if (sum <= 0) return null;
+        // `!(sum > 0)` (not `sum <= 0`) also rejects NaN: a NaN pivot must
+        // surface as non-PD rather than silently propagating through sqrt.
+        if (!(sum > 0)) return null;
         L.data[i * n + j] = Math.sqrt(sum);
       } else {
         L.data[i * n + j] = sum / L.data[j * n + j];

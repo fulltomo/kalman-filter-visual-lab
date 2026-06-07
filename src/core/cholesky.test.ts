@@ -16,6 +16,10 @@ describe('choleskyFactor', () => {
   it('returns null for a non-positive-definite matrix', () => {
     expect(choleskyFactor(fromRows([[1, 2], [2, 1]]))).toBeNull();
   });
+
+  it('returns null for a matrix containing NaN (no silent sqrt(NaN))', () => {
+    expect(choleskyFactor(fromRows([[NaN, 0], [0, 1]]))).toBeNull();
+  });
 });
 
 describe('choleskySolve', () => {
@@ -63,5 +67,9 @@ describe('choleskySolve', () => {
 
   it('throws when b has a different row count than a', () => {
     expect(() => choleskySolve(fromRows([[4, 2], [2, 3]]), fromRows([[1]]))).toThrow();
+  });
+
+  it('throws on a NaN matrix instead of silently returning NaN', () => {
+    expect(() => choleskySolve(fromRows([[NaN, 0], [0, 1]]), fromRows([[1], [1]]))).toThrow();
   });
 });
