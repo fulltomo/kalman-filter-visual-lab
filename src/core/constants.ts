@@ -9,3 +9,8 @@ export const CHOLESKY_MAX_ATTEMPTS = 5;
  * guarantees ε·scale ≥ ε for any input, so jitter is always effective.
  */
 export const CHOLESKY_JITTER_ABS_FLOOR = 1;
+
+/** Divergence-detection thresholds (design-spec §7.7). */
+export const STATE_ABS_LIMIT = 1e3; // |x_i| beyond this ⇒ normExceeded
+export const VAR_TRACE_LIMIT = 1e8; // trace(P)/N beyond this ⇒ varExceeded
+export const SPREAD_FLOOR = 1e-8; // ensemble-collapse warning floor (used Phase 2+)
