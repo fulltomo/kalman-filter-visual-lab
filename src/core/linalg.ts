@@ -13,9 +13,13 @@ export function mat(rows: number, cols: number, fill = 0): Mat {
 
 export function fromRows(rows: number[][]): Mat {
   const r = rows.length;
+  if (r === 0) throw new Error('fromRows: empty input');
   const c = rows[0].length;
   const m = mat(r, c);
   for (let i = 0; i < r; i++) {
+    if (rows[i].length !== c) {
+      throw new Error(`fromRows: ragged row ${i} (expected ${c}, got ${rows[i].length})`);
+    }
     for (let j = 0; j < c; j++) m.data[i * c + j] = rows[i][j];
   }
   return m;
@@ -47,6 +51,10 @@ export function mul(a: Mat, b: Mat): Mat {
   for (let i = 0; i < a.rows; i++) {
     for (let k = 0; k < a.cols; k++) {
       const aik = a.data[i * a.cols + k];
+      // Skip zero multiplicands (dense-accumulation speedup). This intentionally
+      // suppresses 0*Inf / 0*NaN, which is safe here: A is never a structural-zero
+      // matrix coinciding with Inf/NaN in B — divergence detection fires on the
+      // state vector before such a product could arise.
       if (aik === 0) continue;
       for (let j = 0; j < b.cols; j++) {
         m.data[i * b.cols + j] += aik * b.data[k * b.cols + j];

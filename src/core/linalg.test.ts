@@ -26,6 +26,7 @@ describe('linalg basic ops', () => {
     expect(t.rows).toBe(3);
     expect(t.cols).toBe(2);
     expect(get(t, 2, 1)).toBe(6);
+    expect(Array.from(t.data)).toEqual([1, 4, 2, 5, 3, 6]);
   });
 
   it('adds, subtracts, scales', () => {
@@ -49,5 +50,12 @@ describe('linalg basic ops', () => {
 
   it('throws on shape mismatch', () => {
     expect(() => mul(mat(2, 3), mat(2, 2))).toThrow();
+    expect(() => add(mat(2, 2), mat(2, 3))).toThrow(/add/);
+    expect(() => matVec(mat(2, 3), Float64Array.from([1, 2]))).toThrow();
+  });
+
+  it('throws on empty or ragged fromRows input', () => {
+    expect(() => fromRows([])).toThrow(/empty/);
+    expect(() => fromRows([[1, 2], [3]])).toThrow(/ragged/);
   });
 });
