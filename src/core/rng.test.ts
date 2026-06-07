@@ -21,6 +21,17 @@ describe('makeRng', () => {
 
   it('different seeds produce different sequences', () => {
     expect(makeRng(1).next()).not.toBe(makeRng(2).next());
+    expect(makeRng(1).gaussian()).not.toBe(makeRng(2).gaussian());
+  });
+
+  it('gaussian is deterministic for a given seed (exercises the spare cache)', () => {
+    const a = makeRng(99);
+    const b = makeRng(99);
+    // Four draws hit both Box–Muller paths: the spare-generating call (1st, 3rd)
+    // and the spare-consuming call (2nd, 4th).
+    const seqA = [a.gaussian(), a.gaussian(), a.gaussian(), a.gaussian()];
+    const seqB = [b.gaussian(), b.gaussian(), b.gaussian(), b.gaussian()];
+    expect(seqA).toEqual(seqB);
   });
 
   it('gaussian has ~zero mean and ~unit variance', () => {
